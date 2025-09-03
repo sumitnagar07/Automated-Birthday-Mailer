@@ -1,0 +1,52 @@
+import os
+import datetime
+import pandas as pd
+from dotenv import load_dotenv
+
+from notification_manager import NotificationManager
+
+
+load_dotenv()
+
+
+MY_EMAIL = os.getenv("MY_EMAIL")
+MY_PASSWORD = os.getenv("MY_PASSWORD")
+
+if not MY_EMAIL or not MY_PASSWORD:
+    print("Error: Missing MY_EMAIL or MY_PASSWORD in .env file.")
+else:
+
+    notification_manager = NotificationManager(my_email=MY_EMAIL, my_password=MY_PASSWORD)
+
+    def check_and_send_birthdays(file_path="birthdays.csv"):
+        """
+        Reads a CSV file, checks for birthdays today, and sends emails.
+        """
+        try:
+ 
+            data = pd.read_csv(file_path)
+        except FileNotFoundError:
+            print(f"Error: '{file_path}' not found. Please create one with 'name', 'email', 'year', 'month', 'day' columns.")
+            return
+
+        today = datetime.datetime.now()
+        
+       
+        for index, row in data.iterrows():
+            if row['month'] == today.month and row['day'] == today.day:
+                recipient_name = row['name']
+                recipient_email = row['email']
+                
+                subject = f"Happy Birthday, {recipient_name}!"
+                message = (
+                    f"Subject: {subject}\n\n"
+                    f"Hi {recipient_name},\n\n"
+                    f"Wishing you a very happy birthday from your Python script!"
+                )
+                
+      
+                notification_manager.send_email(recipient_email, subject, message)
+
+    if __name__ == "__main__":
+        print("Running Automated Birthday Mailer...")
+        check_and_send_birthdays()
