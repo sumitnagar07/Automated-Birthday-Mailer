@@ -1,0 +1,46 @@
+import smtplib
+# The EmailMessage class is used to create the email message itself.
+from email.message import EmailMessage
+
+# ==================== 2. Class Definition and Initialization ====================
+class NotificationManager:
+    """
+    This class is responsible for sending email notifications for birthdays.
+    It encapsulates the logic for connecting to the email server and sending messages.
+    """
+    def __init__(self, my_email, my_password):
+        # Store the sender's email address and password.
+        self.my_email = my_email
+        self.my_password = my_password
+
+    # ==================== 3. Email Sending Method ====================
+    def send_email(self, recipient_email, subject, message):
+        """
+        Sends an email to the specified recipient using the SMTP server.
+        
+        Args:
+            recipient_email (str): The email address of the recipient.
+            subject (str): The subject line of the email.
+            message (str): The body of the email.
+        """
+        try:
+            # Connect to the Gmail SMTP server on port 587.
+            with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
+                # Start TLS for a secure connection.
+                connection.starttls()  
+                # Log in to the email account using the provided credentials.
+                connection.login(user=self.my_email, password=self.my_password)
+                
+                # Create the email message.
+                msg = EmailMessage()
+                msg.set_content(message)
+                msg['Subject'] = subject
+                msg['From'] = self.my_email
+                msg['To'] = recipient_email
+                
+                # Send the message.
+                connection.send_message(msg)
+                print(f"Email sent successfully to {recipient_email}!")
+        except Exception as e:
+            # Print an error message if the email fails to send.
+            print(f"Error sending email: {e}")
